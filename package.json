@@ -1,0 +1,46 @@
+{
+  "name": "web-crawler",
+  "version": "1.0.0",
+  "description": "Agente de IA para extraer información de páginas web",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --skipLibCheck",
+    "start": "node dist/index.js",
+    "start:simple": "node src/simple-index.js",
+    "dev": "ts-node src/index.ts",
+    "dev:api": "ts-node src/api/server.ts",
+    "start:agent": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "web",
+    "crawler",
+    "langchain",
+    "playwright"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/community": "latest",
+    "@langchain/core": "latest",
+    "axios": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "langchain": "latest",
+    "playwright": "^1.42.1",
+    "typescript": "latest",
+    "uuid": "latest",
+    "winston": "latest"
+  },
+  "devDependencies": {
+    "@types/cors": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "@types/uuid": "latest",
+    "ts-node": "latest"
+  }
+}

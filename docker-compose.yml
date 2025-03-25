@@ -1,0 +1,40 @@
+version: '3.8'
+
+networks:
+  t2_proxy:
+    name: t2_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
+
+x-common-keys-core: &common-keys-core
+  networks:
+    - t2_proxy
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  web-crawler:
+    <<: *common-keys-core
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web-crawler-agent
+    volumes:
+      # Para persistir capturas de pantalla u otros archivos generados
+      - ./data:/app/data
+      # Para persistir logs
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    # Habilitar para usar el agente como API
+    # ports:
+    #  - "3000:3000"
+    # Si necesitas pasar un comando específico
+    # command: npm start "Navega a https://example.com y extrae el título principal" 
