@@ -1,7 +1,11 @@
 FROM node:18-slim
 
-# Instalar dependencias de Playwright
-RUN apt-get update && apt-get install -y \
+# Configurar variables de entorno para Playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalar dependencias de Playwright y preparar sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
     libgconf-2-4 \
@@ -27,17 +31,33 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     xdg-utils \
+    ca-certificates \
+    fonts-noto-color-emoji \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear directorio de trabajo
+# Crear directorios necesarios
 WORKDIR /app
 
-# Copiar archivos de configuración
+# Crear directorios para datos persistentes
+RUN mkdir -p \
+    logs \
+    data \
+    screenshots \
+    profiles \
+    temp
+
+# Mejora: Copiar archivos de configuración de paquetes primero para aprovechar el caché
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Instalar dependencias
-RUN npm install
+# Instalar dependencias del proyecto
+RUN npm ci --quiet
+
+# Instalar Playwright globalmente y navegadores en una capa separada
+RUN npm install -g playwright && \
+    playwright install chromium --with-deps && \
+    playwright install-deps chromium
 
 # Copiar el código fuente
 COPY . .
@@ -45,11 +65,12 @@ COPY . .
 # Compilar el proyecto TypeScript
 RUN npm run build
 
-# Instalar navegadores para Playwright
-RUN npx playwright install chromium --with-deps
+# Limpiar caché y archivos no necesarios para reducir tamaño de imagen
+RUN npm cache clean --force && \
+    rm -rf ~/.npm ~/.cache
 
-# Crear directorios para logs y datos
-RUN mkdir -p logs data
+# Configurar volúmenes para persistencia
+VOLUME ["/app/logs", "/app/data", "/app/screenshots", "/app/profiles", "/app/temp"]
 
 # Exponer el puerto para la API
 EXPOSE 3000
